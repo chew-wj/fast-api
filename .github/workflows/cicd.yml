@@ -34,10 +34,12 @@ jobs:
         run: |
           . venv/bin/activate
           PYTHONPATH=app pytest
-      
+
+      - name: Install truffleHog
+        run: pip install truffleHog
+        
       - name: Run secret scanning
-        run: |
-          trufflehog --json --max_depth 10 .
+        run: trufflehog --json --max_depth 10 .
       
   build-and-deploy:
     name: Build & Deploy FastAPI
