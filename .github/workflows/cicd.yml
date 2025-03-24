@@ -33,7 +33,7 @@ jobs:
         working-directory: crud-interface
         run: |
           . venv/bin/activate
-          pytest
+          PYTHONPATH=/app pytest
       
   build-and-deploy:
     name: Build & Deploy FastAPI
