@@ -35,6 +35,10 @@ jobs:
           . venv/bin/activate
           PYTHONPATH=app pytest
       
+      - name: Run secret scanning
+        run: |
+          trufflehog --json --max_depth 10 .
+      
   build-and-deploy:
     name: Build & Deploy FastAPI
     needs: test
