@@ -43,6 +43,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Build Docker image
+        working-directory: crud-interface
+        run: |
+          docker build -t fast-api:${{ github.sha }} .
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -62,6 +67,9 @@ jobs:
           docker tag $ECR_URI:$IMAGE_TAG $ECR_URI:latest
           docker push $ECR_URI:$IMAGE_TAG
           docker push $ECR_URI:latest
+
+      - name: Set up kubeconfig for EKS
+        run: aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
 
       - name: Update kubeconfig for AWS EKS
         run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
