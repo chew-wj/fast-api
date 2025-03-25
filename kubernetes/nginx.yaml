@@ -1,0 +1,193 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nginx-ingress-clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: nginx-ingress-serviceaccount
+    namespace: ingress-nginx
+---
+# ConfigMap for NGINX Ingress Controller customization
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-configuration
+  namespace: ingress-nginx
+data:
+  # Customize NGINX configuration settings
+  proxy-body-size: "20m"
+  enable-underscores-in-headers: "true"
+  server-tokens: "false"
+  http-snippet: |
+    server {
+      listen 8080;
+      location /custom-health {
+        return 200 'OK';
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-custom-config
+  namespace: ingress-nginx
+data:
+  nginx.conf: |
+    worker_processes  1;
+
+    events {
+      worker_connections  1024;
+    }
+
+    http {
+      include       /etc/nginx/mime.types;
+      default_type  application/octet-stream;
+
+      # Additional NGINX global configuration can go here
+      server {
+        listen 80;
+        server_name localhost;
+        location / {
+          root   /usr/share/nginx/html;
+          index  index.html index.htm;
+        }
+      }
+    }
+
+---
+# Create necessary RBAC (Role, RoleBinding, and ServiceAccount)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nginx-ingress-serviceaccount
+  namespace: ingress-nginx
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: ingress-nginx
+  name: nginx-ingress-role
+rules:
+- apiGroups: [""]
+  resources: ["services", "endpoints", "pods", "secrets", "configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: nginx-ingress-rolebinding
+  namespace: ingress-nginx
+subjects:
+- kind: ServiceAccount
+  name: nginx-ingress-serviceaccount
+  namespace: ingress-nginx
+roleRef:
+  kind: Role
+  name: nginx-ingress-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# NGINX Ingress Controller Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-ingress-controller
+  namespace: ingress-nginx
+  labels:
+    app: nginx-ingress-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-ingress-controller
+  template:
+    metadata:
+      labels:
+        app: nginx-ingress-controller
+    spec:
+      serviceAccountName: nginx-ingress-serviceaccount
+      containers:
+      - name: nginx-ingress-controller
+        image: registry.k8s.io/ingress-nginx/controller:v1.9.4
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: ingress-nginx-config
+          mountPath: /etc/nginx/ingress-controller.conf
+          subPath: ingress-controller.conf
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-custom-config
+      - name: ingress-nginx-config
+        configMap:
+          name: nginx-configuration
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-ingress-service
+  namespace: ingress-nginx
+  labels:
+    app: nginx-ingress-controller
+spec:
+  selector:
+    app: nginx-ingress-controller
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30080  # Expose on NodePort 30080
+      name: http       # Name for the port
+    - protocol: TCP
+      port: 443
+      targetPort: 443
+      nodePort: 30443  # Expose on NodePort 30443
+      name: https      # Name for the port
+  type: NodePort
+---
+# Deploy a sample Ingress to test the setup
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fastapi-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: fastapi.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: fastapi-service
+            port:
+              number: 80
