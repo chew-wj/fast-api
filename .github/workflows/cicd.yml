@@ -3,7 +3,7 @@ name: FastAPI CI/CD
 on:
   push:
     branches:
-      - main  # Adjust to your deployment branch
+      - dev  # Adjust to your deployment branch
 
 env:
   AWS_REGION: ap-southeast-1  
@@ -22,7 +22,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
       
-      - name: Set up PYthon environment
+      
+      - name: Set up Python environment
         working-directory: crud-interface
         run: |
           python -m venv venv
@@ -32,6 +33,9 @@ jobs:
       - name: Run tests
         working-directory: crud-interface
         run: |
+          export MONGODB_URI=${{ secrets.MONGODB_URI}}
+          export MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME}}
+          export MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD}}
           . venv/bin/activate
           PYTHONPATH=app pytest
 
