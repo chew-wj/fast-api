@@ -10,6 +10,3 @@ class User(BaseModel):
     email: str
     full_name: Optional[str] = None
 
-class UserCreate(User):
-    password: str
-

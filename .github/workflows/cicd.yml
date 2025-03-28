@@ -37,7 +37,7 @@ jobs:
 
       - name: Install truffleHog
         run: pip install truffleHog
-        
+
       - name: Run secret scanning
         run: trufflehog --json --max_depth 10 .
       
@@ -77,8 +77,12 @@ jobs:
       - name: Set up kubeconfig for EKS
         run: aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
 
-      - name: Update kubeconfig for AWS EKS
-        run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+      - name: create secrets for mongodb
+        env: 
+          MONGO_USERNAME: ${{ secrets.MONGO_USERNAME}}
+          MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD}}
+          MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING}}
+        run: kubectl create secret generic mongodb-secrets --from-literal=username=$MONGO_USERNAME --from-literal=password=$MONGO_PASSWORD  --from-literal=mongodb-connection-string=mongodb://mongouser:mongopassword@mongodb-service:27017
 
       - name: Deploy to Kubernetes
         run: |
