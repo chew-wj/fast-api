@@ -1,9 +1,14 @@
-FROM python:3.9.0-alpine
+FROM python:3.9-slim
 
 WORKDIR /code/app
 
 # Install necessary build dependencies
-RUN apk add --no-cache gcc musl-dev libffi-dev rust cargo
+RUN apt-get update && apt-get install -y \
+    gcc \
+    python3-dev \
+    libffi-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY ./requirements.txt /code/requirements.txt
 

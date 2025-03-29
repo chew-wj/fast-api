@@ -12,12 +12,9 @@ class WebhookDestination(BaseModel):
     active: bool = True
 
 WEBHOOK_DESTINATIONS = {
-    "inventory": WebhookDestination(
-        name="Inventory System",
-        url="https://example.com/inventory-webhook"
-    ),
-    "notifications": WebhookDestination(
-        name="Notification Service",
-        url="https://example.com/notifications"
+    "webhook_site": WebhookDestination(
+        name="Webhook.site Test",
+        url="https://webhook.site/04846f68-7539-4741-8c84-ad379e64fcd2",
+        active=True
     )
 }
