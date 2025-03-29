@@ -58,7 +58,10 @@ jobs:
         working-directory: crud-interface
         run: |
           docker build -t fast-api:${{ github.sha }} .
-
+      
+      - name: List Docker Images
+        run: docker images
+        
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.18.3
@@ -66,8 +69,8 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         run: |
-          trivy image fast-api:${{ github.sha }} --severity HIGH --exit-code 1
-          trivy image fast-api:${{ github.sha }} --severity CRITICAL --exit-code 1
+          trivy --debug image fast-api:${{ github.sha }} --severity HIGH --exit-code 1
+          trivy --debug image fast-api:${{ github.sha }} --severity CRITICAL --exit-code 1
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
