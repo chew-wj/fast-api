@@ -3,7 +3,8 @@ name: FastAPI CI/CD
 on:
   push:
     branches:
-      - dev  # Adjust to your deployment branch
+      - dev 
+      - main 
 
 env:
   AWS_REGION: ap-southeast-1  
