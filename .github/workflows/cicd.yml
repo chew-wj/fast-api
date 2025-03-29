@@ -65,7 +65,6 @@ jobs:
           trivy --version
 
       - name: Run Trivy vulnerability scanner
-        working-directory: crud-interface
         run: |
           trivy image fast-api:${{ github.sha }} --severity HIGH --exit-code 1
           trivy image fast-api:${{ github.sha }} --severity CRITICAL --exit-code 1
