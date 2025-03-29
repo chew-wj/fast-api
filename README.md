@@ -59,6 +59,73 @@ Access the API documentations at:
 Swagger UI: http://localhost:8000/docs <br>
 ReDoc: http://localhost:8000/redoc
 
+### Running on Minikube Locally
+
+1. Start Minikube:
+```sh
+minikube start
+```
+
+2. Enable Minikube's Docker daemon:
+```sh
+eval $(minikube docker-env)
+```
+
+3. Build the Docker image:
+```sh
+docker build -t fast-api:latest .
+```
+
+4. Apply Kubernetes manifests:
+```sh
+kubectl apply -f kubernetes/
+```
+
+5. Check deployment status:
+```sh
+kubectl get pods
+kubectl get services
+```
+
+6. Set up local DNS resolution:
+```sh
+# Add this line to /etc/hosts (requires sudo)
+echo "$(minikube ip) fastapi.local" | sudo tee -a /etc/hosts
+```
+
+7. Start minikube tunnel in a separate terminal:
+```sh
+minikube tunnel
+```
+
+8. Access the application:
+```sh
+# The application will be available at:
+curl http://fastapi.local:8000
+```
+
+To stop the Minikube cluster:
+```sh
+minikube stop
+```
+
+To delete the Minikube cluster:
+```sh
+minikube delete
+```
+
+Note: Keep the `minikube tunnel` command running in a separate terminal while accessing the application. The tunnel provides a route to services deployed with type LoadBalancer.
+
+## Deploying to the Cloud
+
+### EKS Deployment
+
+## API Documentation
+
+## Testing
+
+## Security Considerations
+
 
 
 
