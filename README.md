@@ -71,37 +71,55 @@ minikube start
 eval $(minikube docker-env)
 ```
 
-3. Build the Docker image:
+3. Install Nginx Ingress Controller:
+```sh
+# Add the ingress-nginx Helm repository
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+
+# Install ingress-nginx
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --set controller.service.type=NodePort
+```
+
+4. Build the Docker image:
 ```sh
 docker build -t fast-api:latest .
 ```
 
-4. Apply Kubernetes manifests:
+5. Export local variables and create kubernetes secrets
+```sh
+export MONGO_USERNAME=mongouser
+export MONGO_PASSWORD=mongopassword
+kubectl create secret generic mongodb-secrets --from-literal=username=$MONGO_USERNAME --from-literal=password=$MONGO_PASSWORD  --from-literal=mongodb-connection-string=mongodb://mongouser:mongopassword@mongodb-service:27017
+```
+
+6. Apply Kubernetes manifests:
 ```sh
 kubectl apply -f kubernetes/
 ```
 
-5. Check deployment status:
+7. Check deployment status:
 ```sh
 kubectl get pods
 kubectl get services
 ```
 
-6. Set up local DNS resolution:
+8. Set up local DNS resolution:
 ```sh
 # Add this line to /etc/hosts (requires sudo)
-echo "$(minikube ip) fastapi.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 fastapi.local" | sudo tee -a /etc/hosts
 ```
 
-7. Start minikube tunnel in a separate terminal:
+9. Start minikube tunnel in a separate terminal:
 ```sh
 minikube tunnel
 ```
 
-8. Access the application:
+10. Access the application:
 ```sh
 # The application will be available at:
-curl http://fastapi.local:8000
+curl http://fastapi.local
 ```
 
 To stop the Minikube cluster:
@@ -125,7 +143,3 @@ Note: Keep the `minikube tunnel` command running in a separate terminal while ac
 ## Testing
 
 ## Security Considerations
-
-
-
-
