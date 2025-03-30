@@ -49,7 +49,7 @@ def read_root():
 def health_check():
     return {"status":"ok"}
 
-@app("startup")
+@app.on_event("startup")
 async def startup_event():
     try:
         # Create admin user if it doesn't exist
