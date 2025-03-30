@@ -69,7 +69,6 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         run: |
-          trivy image alpine:latest
           trivy --debug image fast-api:${{ github.sha }} --format table --exit-code 1
           trivy --debug image fast-api:${{ github.sha }} --format table --exit-code 1
 
