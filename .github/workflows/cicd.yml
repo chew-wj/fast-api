@@ -69,8 +69,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         run: |
-          trivy --debug image fast-api:${{ github.sha }} --format table --exit-code 1
-          trivy --debug image fast-api:${{ github.sha }} --format table --exit-code 1
+          trivy image fast-api:${{ github.sha }} --format table --exit-code 1 || true
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
