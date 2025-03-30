@@ -1,28 +1,5 @@
 # fast-api
 
-## Architecture Overview
-
-### High-Level Architecture
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Client        │     │   Ingress       │     │   FastAPI       │
-│   (Browser/API) │────▶│   Controller    │────▶│   Application   │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                         │
-                                                         ▼
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Prometheus    │     │   Grafana       │     │   MongoDB       │
-│   (Metrics)     │◀───▶│   (Dashboard)   │◀───▶│   (Database)    │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-
-Infrastructure Components:
-- VPC with public and private subnets
-- EKS cluster with managed node groups
-- NAT Gateway for private subnet connectivity
-- Security groups for cluster and node access
-- IAM roles and policies for EKS
-```
-
 ##Table of Contents
 1. [Prerequisites](#prerequisites)
 2. [Local Installation](#local-installation)  

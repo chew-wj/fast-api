@@ -105,6 +105,5 @@ jobs:
         run: |
           ECR_URI=$(aws ecr describe-repositories --query "repositories[?repositoryName=='${{ env.ECR_REPOSITORY }}'].repositoryUri" --output text)
           IMAGE_TAG=$(git rev-parse --short HEAD)
-          sed -i "s|<ECR_URI>|$ECR_URI|g" k8s/deployment.yaml
-          sed -i "s|<IMAGE_TAG>|$IMAGE_TAG|g" k8s/deployment.yaml
-          kubectl apply -f k8s/
+          sed -i "s|fast-api:latest|$ECR_URI:$IMAGE_TAG|g" kubernetes/fast-api.yaml
+          kubectl apply -f kubernetes/
