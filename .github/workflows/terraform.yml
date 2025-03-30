@@ -33,7 +33,7 @@ jobs:
           output-file: checkov-report.txt
 
       - name: Upload Checkov Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         if: always()
         with:
           name: checkov-report
