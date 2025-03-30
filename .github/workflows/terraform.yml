@@ -32,13 +32,6 @@ jobs:
           output-format: cli
           output-file: checkov-report.txt
 
-      - name: Upload Checkov Report
-        uses: actions/upload-artifact@v2
-        if: always()
-        with:
-          name: checkov-report
-          path: checkov-report.txt
-
   terraform:
     name: 'Terraform'
     needs: security-scan
