@@ -1,5 +1,28 @@
 # fast-api
 
+## Architecture Overview
+
+### High-Level Architecture
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Client        │     │   Ingress       │     │   FastAPI       │
+│   (Browser/API) │────▶│   Controller    │────▶│   Application   │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                         │
+                                                         ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Prometheus    │     │   Grafana       │     │   MongoDB       │
+│   (Metrics)     │◀───▶│   (Dashboard)   │◀───▶│   (Database)    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+
+Infrastructure Components:
+- VPC with public and private subnets
+- EKS cluster with managed node groups
+- NAT Gateway for private subnet connectivity
+- Security groups for cluster and node access
+- IAM roles and policies for EKS
+```
+
 ##Table of Contents
 1. [Prerequisites](#prerequisites)
 2. [Local Installation](#local-installation)  
@@ -140,17 +163,88 @@ Note: Keep the `minikube tunnel` command running in a separate terminal while ac
 
 ## API Documentation
 
-The API documentation is automatically generated using FastAPI's built-in Swagger UI and ReDoc. You can access them at:
+### Available Endpoints
 
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+1. Authentication:
+   - POST `/auth/token` - Get access token
+   - GET `/auth/me` - Get current user info
 
-The API documentation includes:
-- Detailed endpoint descriptions
-- Request/response schemas
-- Authentication requirements
-- Example requests and responses
-- Interactive API testing interface
+2. User Management:
+   - GET `/users` - List all users
+   - GET `/users/{user_id}` - Get user details
+   - POST `/users` - Create new user
+   - PUT `/users/{user_id}` - Update user
+   - DELETE `/users/{user_id}` - Delete user
+
+3. Webhook/Callback:
+   - POST `/webhook` - Receive webhook events
+   - GET `/webhook/status` - Check webhook status
+
+4. Health:
+   - GET `/health` - Health check endpoint
+
+### Webhook/Callback Implementation
+The application implements a webhook system that allows external services to send events:
+- Webhook endpoint accepts POST requests with JSON payload
+- Events are validated and processed asynchronously
+- Status endpoint provides real-time webhook processing status
+- Failed events are retried automatically
+- Webhook events are logged for audit purposes
+
+## Monitoring and Observability
+
+### Metrics Collection
+- Prometheus collects application metrics
+- Key metrics include:
+  - Request latency
+  - Error rates
+  - Active users
+  - Database connection status
+
+### Logging
+- Application logs are collected and stored
+- Log levels: INFO, WARNING, ERROR
+- Structured logging format for easy parsing
+
+### Dashboards
+- Grafana dashboards for:
+  - Application performance
+  - Error rates
+  - User activity
+  - System resources
+
+## Troubleshooting Guide
+
+### Common Issues
+1. Database Connection
+   - Check MongoDB service status
+   - Verify connection string
+   - Check network connectivity
+
+2. Authentication Issues
+   - Verify JWT token validity
+   - Check user permissions
+   - Validate credentials
+
+3. Deployment Problems
+   - Check pod status
+   - Verify service configuration
+   - Review ingress rules
+
+### Debug Commands
+```bash
+# Check pod status
+kubectl get pods -n fastapi-namespace
+
+# View application logs
+kubectl logs -f deployment/fastapi-app
+
+# Check service status
+kubectl get svc -n fastapi-namespace
+
+# Verify ingress configuration
+kubectl get ingress -n fastapi-namespace
+```
 
 ## Testing
 

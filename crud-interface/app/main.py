@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from routes.user import user
 from routes.auth import auth
+from routes.webhook import webhook
 from datetime import datetime, timedelta
 import logging
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,6 +39,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 app.include_router(user)
 app.include_router(auth)
+app.include_router(webhook)
 
 @app.get("/")
 def read_root():

@@ -18,3 +18,17 @@ WEBHOOK_DESTINATIONS = {
         active=True
     )
 }
+
+class WebhookEvent(BaseModel):
+    id: Optional[str] = None
+    event_type: str
+    payload: Dict[str, Any]
+    status: Optional[str] = None
+    received_at: Optional[datetime] = None
+    processed_at: Optional[datetime] = None
+    error: Optional[str] = None
+
+class WebhookStatus(BaseModel):
+    id: str
+    status: str
+    received_at: datetime
