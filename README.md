@@ -154,28 +154,14 @@ The API documentation includes:
 
 ## Testing
 
-The project uses pytest for testing. The test suite includes:
-
-1. Unit Tests:
+Run tests locally:
 ```sh
-# Run tests locally
 cd crud-interface
 export MONGODB_URI=mongodb://localhost:27017/local
 export MONGODB_USERNAME=username
 export MONGODB_PASSWORD=password
 PYTHONPATH=app pytest
 ```
-
-2. CI/CD Pipeline Tests:
-- Automated test execution on every push to dev branch
-- MongoDB connection testing
-- Health check endpoint validation
-- Secret scanning using truffleHog
-
-3. Postman Collections:
-- Located in `crud-interface/postman/`
-- Contains API test collections for manual testing
-- Environment variables for different deployment stages
 
 ## Security Considerations
 

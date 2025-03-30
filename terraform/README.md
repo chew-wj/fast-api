@@ -1,6 +1,6 @@
 # AWS EKS Infrastructure with Terraform
 
-This directory contains Terraform configurations to set up a production-ready AWS EKS cluster with all necessary networking components.
+This directory contains Terraform configurations to set up an AWS EKS cluster with networking components.
 
 ## Prerequisites
 
@@ -8,14 +8,6 @@ This directory contains Terraform configurations to set up a production-ready AW
 - AWS CLI configured with appropriate credentials
 - kubectl installed
 - AWS account with appropriate permissions
-
-## Infrastructure Components
-
-- VPC with public and private subnets
-- NAT Gateway for private subnet connectivity
-- EKS Cluster with managed node groups
-- Security groups for cluster and node access
-- IAM roles and policies for EKS
 
 ## Usage
 
@@ -46,11 +38,9 @@ This directory contains Terraform configurations to set up a production-ready AW
 
 ## Important Notes
 
-- The configuration uses the AWS provider and EKS module from the Terraform registry
 - State file is configured to be stored in S3 (uncomment and configure the backend block in main.tf)
 - Default region is set to us-west-2 (modify in variables.tf if needed)
 - Node groups are configured with t3.medium instances by default
-- The cluster is configured with public access enabled for the control plane
 
 ## Security Considerations
 
