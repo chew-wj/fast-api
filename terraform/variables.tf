@@ -59,4 +59,22 @@ variable "tags" {
     Environment = "dev"
     Terraform   = "true"
   }
+}
+
+variable "acm_certificate_arn" {
+  description = "ARN of ACM certificate to use with ALB"
+  type        = string
+  default     = ""  # Replace with your certificate ARN
+}
+
+variable "waf_rate_limit" {
+  description = "Rate limit for WAF rules (requests per 5 minutes per IP)"
+  type        = number
+  default     = 2000
+}
+
+variable "enable_shield_advanced" {
+  description = "Enable AWS Shield Advanced protection"
+  type        = bool
+  default     = false
 } 
