@@ -145,7 +145,6 @@ The architecture consists of:
 - A VPC containing the EKS cluster
 - EKS Control Plane managing the cluster
 - Managed Node Groups for running workloads
-- Aurora DB for database storage
 - S3 bucket for Terraform state storage
 
 To deploy the application to EKS manually using existing manifests:
