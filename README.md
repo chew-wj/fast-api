@@ -138,59 +138,107 @@ Note: Keep the `minikube tunnel` command running in a separate terminal while ac
 
 ### EKS Deployment
 
+To deploy the application to EKS manually using existing manifests:
+
+1. Configure AWS CLI and kubectl:
+```sh
+# Configure AWS CLI with your credentials
+aws configure
+
+# Update kubeconfig for your EKS cluster
+aws eks update-kubeconfig --region ap-southeast-1 --name my-eks-cluster
+```
+
+2. Create the namespace and verify:
+```sh
+kubectl create namespace fastapi-app
+kubectl get namespace
+```
+
+3. Create MongoDB secrets:
+```sh
+# Replace with your actual MongoDB credentials
+export MONGO_USERNAME=your_username
+export MONGO_PASSWORD=your_password
+export MONGO_CONNECTION_STRING=mongodb://mongouser:mongopassword@mongodb-service:27017
+
+kubectl create secret generic mongodb-secrets \
+  --from-literal=username=$MONGO_USERNAME \
+  --from-literal=password=$MONGO_PASSWORD \
+  --from-literal=mongodb-connection-string=$MONGO_CONNECTION_STRING \
+  -n fastapi-app
+```
+
+4. Deploy MongoDB:
+```sh
+kubectl apply -f kubernetes/mongodb.yaml -n fastapi-app
+```
+
+5. Build and push Docker image to ECR:
+```sh
+# Login to ECR
+aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin $(aws ecr describe-repositories --query "repositories[?repositoryName=='fastapi-app'].repositoryUri" --output text)
+
+# Build and tag image
+docker build -t fast-api:latest .
+docker tag fast-api:latest $(aws ecr describe-repositories --query "repositories[?repositoryName=='fastapi-app'].repositoryUri" --output text):latest
+
+# Push to ECR
+docker push $(aws ecr describe-repositories --query "repositories[?repositoryName=='fastapi-app'].repositoryUri" --output text):latest
+```
+
+6. Deploy the FastAPI application:
+```sh
+kubectl apply -f kubernetes/fast-api.yaml -n fastapi-app
+```
+
+7. Verify the deployment:
+```sh
+# Check pods
+kubectl get pods -n fastapi-app
+
+# Check services
+kubectl get svc -n fastapi-app
+
+# Check ingress
+kubectl get ingress -n fastapi-app
+```
+
+8. Access the application:
+```sh
+# Get the external IP/hostname of your ingress controller
+kubectl get svc -n ingress-nginx
+
+# Access the application using the external IP/hostname
+curl http://<external-ip>
+```
+
+Troubleshooting:
+- Check pod logs: `kubectl logs -f deployment/fastapi-app -n fastapi-app`
+- Check pod status: `kubectl describe pod <pod-name> -n fastapi-app`
+- Verify secrets: `kubectl get secrets mongodb-secrets -n fastapi-app -o yaml`
+- Check ingress configuration: `kubectl describe ingress fastapi-ingress -n fastapi-app`
+
+To clean up:
+```sh
+# Delete the application
+kubectl delete -f kubernetes/fast-api.yaml -n fastapi-app
+
+# Delete MongoDB
+kubectl delete -f kubernetes/mongodb.yaml -n fastapi-app
+
+# Delete secrets
+kubectl delete secret mongodb-secrets -n fastapi-app
+
+# Delete namespace
+kubectl delete namespace fastapi-app
+```
+
 ## API Documentation
 
-### Available Endpoints
+Swagger UI: http://localhost:8000/docs <br>
+ReDoc: http://localhost:8000/redoc
 
-1. Authentication:
-   - POST `/auth/token` - Get access token
-   - GET `/auth/me` - Get current user info
-
-2. User Management:
-   - GET `/users` - List all users
-   - GET `/users/{user_id}` - Get user details
-   - POST `/users` - Create new user
-   - PUT `/users/{user_id}` - Update user
-   - DELETE `/users/{user_id}` - Delete user
-
-3. Webhook/Callback:
-   - POST `/webhook` - Receive webhook events
-   - GET `/webhook/status` - Check webhook status
-
-4. Health:
-   - GET `/health` - Health check endpoint
-
-### Webhook/Callback Implementation
-The application implements a webhook system that allows external services to send events:
-- Webhook endpoint accepts POST requests with JSON payload
-- Events are validated and processed asynchronously
-- Status endpoint provides real-time webhook processing status
-- Failed events are retried automatically
-- Webhook events are logged for audit purposes
-
-## Monitoring and Observability
-
-### Metrics Collection
-- Prometheus collects application metrics
-- Key metrics include:
-  - Request latency
-  - Error rates
-  - Active users
-  - Database connection status
-
-### Logging
-- Application logs are collected and stored
-- Log levels: INFO, WARNING, ERROR
-- Structured logging format for easy parsing
-
-### Dashboards
-- Grafana dashboards for:
-  - Application performance
-  - Error rates
-  - User activity
-  - System resources
-
-## Troubleshooting Guide
 
 ### Common Issues
 1. Database Connection
@@ -306,17 +354,8 @@ This project implements comprehensive DevSecOps practices to ensure security and
   - ECR image scanning
   - VPC security groups
 
-### 5. Monitoring & Compliance
-- **Logging & Monitoring**:
-  - Centralized logging with ELK stack
-  - Prometheus metrics collection
-  - Grafana dashboards for visualization
-- **Compliance Checks**:
-  - Automated compliance scanning
-  - Regular security assessments
-  - Policy enforcement through OPA
 
-### 6. CI/CD Security
+### 5. CI/CD Security
 - **Pipeline Security**:
   - Secure handling of secrets in GitHub Actions
   - Signed commits and tags
@@ -326,7 +365,7 @@ This project implements comprehensive DevSecOps practices to ensure security and
   - Blue-green deployments
   - Automated rollback capabilities
 
-### 7. Documentation & Training
+### 6. Documentation & Training
 - **Security Documentation**:
   - Security policy documentation
   - Incident response procedures
