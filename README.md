@@ -140,6 +140,7 @@ Note: Keep the `minikube tunnel` command running in a separate terminal while ac
 
 #### Architecture Overview
 ![AWS Architecture](docs/images/aws-architecture.drawio.svg)
+![Kubernetes Architecture](docs/images/kubernetes-architecture.drawio.svg)
 
 The architecture consists of:
 - A VPC containing the EKS cluster
