@@ -21,8 +21,8 @@ spec:
     spec:
       containers:
       - name: fastapi-app
-        image: fast-api:latest
-        imagePullPolicy: Always
+        image: fast-api:1.0.1
+        imagePullPolicy: Never
         ports:
         - containerPort: 80
         env:
